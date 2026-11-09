@@ -56,6 +56,7 @@ export const treeTool = {
     if (!this.center) return 'Click the trunk';
     return `Canopy ${fmtFt(dist(this.center, input.pt) * 2)} <span class="muted">· or type a diameter</span>`;
   },
+  banner() { return 'Click the trunk, then click the edge of the canopy. Or click the trunk and type a diameter.'; },
   status() { return 'Click the trunk, then click the canopy edge (or type a diameter + Enter). Tool stays on so you can place several trees. Esc to stop.'; },
 };
 
@@ -94,6 +95,7 @@ export const measureTool = {
     if (pts.length >= 3) s += ` · area if closed ${fmtArea(polyArea(pts))}`;
     return s;
   },
+  banner() { return 'Click points to measure. Double-click or press Enter to stop.'; },
   status() { return 'Click points to measure a distance; keep clicking for a running total. Double-click or Enter to stop. Nothing is added to the plan.'; },
 };
 
@@ -152,6 +154,7 @@ export const dimensionTool = {
     if (!this.b) return `${fmtFt(dist(this.a, input.pt))} <span class="muted">· click second point</span>`;
     return `${fmtFt(dist(this.a, this.b))} <span class="muted">· click to place the line</span>`;
   },
+  banner() { return 'Click two points, then move out and click to place the dimension line.'; },
   status() { return 'Click two points, then move out and click to place the dimension line. It stays on the plan and on printouts.'; },
 };
 
@@ -204,6 +207,7 @@ export const calibrateTool = {
     }
   },
   tip() { return this.p1 ? 'Click the other end' : 'Click one end of a known distance'; },
+  banner() { return this.status(); },
   status() { return 'Zoom in close. Click both ends of something you know the length of, then type its real length. The more accurate the clicks, the more accurate the plan.'; },
 };
 
@@ -227,6 +231,7 @@ export const moveBgTool = {
   onUp() { store.end(); this.last = null; },
   onKey(e) { if (e.key === 'Escape' || e.key === 'Enter') { setTool('select'); return true; } return false; },
   tip() { return 'Drag to line up the image'; },
+  banner() { return this.status(); },
   status() { return 'Drag the image to line it up with your drawing. Press Esc or Enter when done.'; },
 };
 

@@ -23,10 +23,10 @@ const $ = (s) => document.querySelector(s);
 registerTool('select', selectTool);
 registerTool('pan', panTool);
 registerTool('property', makePolygonTool('site.property', { hint: 'Click a property corner' }));
-registerTool('house', makePolygonTool('site.house', { allowRect: true, defaultRect: true, hint: 'Click a house corner' }));
-registerTool('structure', makePolygonTool('site.structure', { allowRect: true, defaultRect: true, hint: 'Click a corner' }));
-registerTool('driveway', makePolygonTool('site.driveway', { hint: 'Click a driveway corner' }));
-registerTool('patio', makePolygonTool('site.patio', { hint: 'Click a corner' }));
+registerTool('house', makePolygonTool('site.house', { allowRect: true, defaultRect: true }));
+registerTool('structure', makePolygonTool('site.structure', { allowRect: true, defaultRect: true }));
+registerTool('driveway', makePolygonTool('site.driveway', { allowRect: true, defaultRect: true }));
+registerTool('patio', makePolygonTool('site.patio', { allowRect: true, defaultRect: true }));
 registerTool('tree', treeTool);
 registerTool('measure', measureTool);
 registerTool('dimension', dimensionTool);
@@ -61,11 +61,6 @@ function buildRail() {
 function syncRail(id) {
   document.querySelectorAll('#rail .tool').forEach((b) => b.classList.toggle('on', b.dataset.tool === id));
   $('#status-hint').textContent = (activeTool() && activeTool().status && id !== 'select') ? activeTool().status() : 'Scroll to zoom · Space + drag or middle mouse to pan · ? for shortcuts';
-  const banner = $('#banner');
-  if (id === 'calibrate' || id === 'moveBg') {
-    banner.textContent = activeTool().status();
-    banner.hidden = false;
-  } else banner.hidden = true;
 }
 
 // ---- top bar ---------------------------------------------------------------

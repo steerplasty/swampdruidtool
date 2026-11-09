@@ -221,6 +221,17 @@ export function redrawOverlay() {
   if (active && active.drawOverlay) active.drawOverlay(ov);
   drawSnapMarker();
   view.toolLayer.batchDraw();
+  updateBanner();
+}
+
+// Short instructions pinned to the top of the canvas while a drawing tool is on
+let bannerEl = null;
+function updateBanner() {
+  if (!bannerEl) bannerEl = document.getElementById('banner');
+  if (!bannerEl) return;
+  const text = active && active.banner ? active.banner() : '';
+  if (bannerEl.textContent !== text) bannerEl.textContent = text;
+  bannerEl.hidden = !text;
 }
 
 // ---- cursor tip -----------------------------------------------------------

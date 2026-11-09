@@ -13,6 +13,8 @@ import { toast } from '../ui/toast.js';
 export function makePolygonTool(type, { allowRect = false, defaultRect = false, hint = '' } = {}) {
   let pts = [];
   let mode = defaultRect ? 'rect' : 'poly';
+  let down = null;
+  const nearFirst = (p) => mode === 'poly' && pts.length >= 3 && dist(p, pts[0]) < view.px(12);
 
   const def = TYPES[type];
 
@@ -57,13 +59,32 @@ export function makePolygonTool(type, { allowRect = false, defaultRect = false, 
 
     onDown() {
       const p = resolvePoint({ from: pts[pts.length - 1] || null, extra: pts.slice(0, 1) });
+      down = { screen: { ...input.screen }, startCount: pts.length };
       if (mode === 'rect') {
         pts.push(p);
-        if (pts.length === 3) finish(rectFrom(pts[0], pts[1], pts[2]));
+        if (pts.length === 3) { finish(rectFrom(pts[0], pts[1], pts[2])); down = null; }
         return;
       }
-      if (pts.length >= 3 && dist(p, pts[0]) < view.px(10)) { finish(pts); return; }
+      if (nearFirst(p)) { finish(pts); down = null; return; }
       pts.push(p);
+    },
+
+    // Press, drag and release also works: in rectangle mode it draws a box corner to corner,
+    // in shape mode it draws one side.
+    onUp() {
+      if (!down) return;
+      const moved = Math.hypot(input.screen.x - down.screen.x, input.screen.y - down.screen.y);
+      const started = down.startCount;
+      down = null;
+      if (moved < 8) return;
+      const p = resolvePoint({ from: pts[pts.length - 1] || null, extra: pts.slice(0, 1) });
+      if (mode === 'rect' && started === 0 && pts.length === 1) {
+        const a = pts[0];
+        if (Math.abs(p[0] - a[0]) < 0.5 || Math.abs(p[1] - a[1]) < 0.5) return;
+        finish([a, [p[0], a[1]], p, [a[0], p[1]]]);
+      } else if (mode === 'poly') {
+        if (nearFirst(p)) finish(pts); else pts.push(p);
+      }
     },
 
     onMove() {
@@ -123,26 +144,39 @@ export function makePolygonTool(type, { allowRect = false, defaultRect = false, 
         if (pts.length >= 2) ov.line([cur, pts[0]], { dash: [5, 5], width: 1 });
         if (pts.length >= 2) ov.line([...pts, cur], { closed: true, width: 0, fill: 'rgba(31,138,112,0.08)' });
       }
-      pts.forEach((p, i) => ov.handle(p, { size: i === 0 ? 10 : 7 }));
+      const closing = nearFirst(cur);
+      pts.forEach((p, i) => ov.handle(p, i === 0
+        ? { size: closing ? 16 : 11, color: '#d9822b', fill: closing ? '#d9822b' : '#fff3e6' }
+        : { size: 7 }));
     },
 
     tip() {
       const cur = input.pt;
-      if (!pts.length) return hint || `Click to start the ${def.label.toLowerCase()}`;
+      if (!pts.length) {
+        if (mode === 'rect') return `Click a corner, or drag a box`;
+        return hint || `Click the first corner`;
+      }
       const last = pts[pts.length - 1];
       const seg = fmtFt(dist(last, cur));
       if (mode === 'rect') {
-        if (pts.length === 1) return `${seg} <span class="muted">· type 40x30</span>`;
+        if (pts.length === 1) return `${seg} <span class="muted">· click the other end of this wall, or type 40x30</span>`;
         const r = rectFrom(pts[0], pts[1], cur);
-        return `${fmtFt(dist(pts[0], pts[1]))} × ${fmtFt(dist(r[1], r[2]))}`;
+        return `${fmtFt(dist(pts[0], pts[1]))} × ${fmtFt(dist(r[1], r[2]))} <span class="muted">· click to set the depth</span>`;
       }
+      if (nearFirst(cur)) return '<b>Click to finish the shape</b>';
       const area = pts.length >= 2 ? ` · ${fmtArea(polyArea([...pts, cur]))}` : '';
-      return `${seg}${area}`;
+      const next = pts.length >= 3 ? ' <span class="muted">· click the orange corner or press Enter to finish</span>' : ' <span class="muted">· click the next corner</span>';
+      return `${seg}${area}${next}`;
+    },
+
+    banner() {
+      if (mode === 'rect') return 'Drag a box, or click two corners along one wall and then click once more to set the depth.';
+      return 'Click each corner. To finish, click the first (orange) corner again, double-click, or press Enter.';
     },
 
     status() {
-      if (mode === 'rect') return 'Click two corners along one wall, then click to set the depth. Or type a size like 40x30 after the first click. Esc cancels.';
-      return 'Click each corner. Type a length + Enter for an exact side. Shift locks angles, Alt turns off snapping. Click the first point or press Enter to finish.';
+      if (mode === 'rect') return 'Drag a box corner to corner. For a rotated shape, click two corners along one wall, then click to set the depth. Or click once and type a size like 40x30. Esc cancels.';
+      return 'Click each corner. To finish, click the first (orange) corner again, double-click, or press Enter. Type a length + Enter for an exact side. Shift locks angles, Alt turns off snapping.';
     },
 
     perimeterSoFar: () => pathLength(pts),
