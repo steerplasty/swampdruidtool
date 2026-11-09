@@ -1,0 +1,13 @@
+{
+  "name": "swampdruidtool",
+  "short_name": "swampdruidtool",
+  "description": "Free landscape design tool: trace your property to scale and plan the landscape.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f1e8",
+  "theme_color": "#1d2b20",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>swampdruidtool</title>
+  <meta name="description" content="Free landscape design tool. Trace a Google Maps screenshot or survey, lay out the property, and plan your landscape to scale.">
+  <meta name="theme-color" content="#1d2b20">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div id="brand" class="brand"></div>
+    <input id="plan-name" class="plan-name" type="text" value="Untitled plan" aria-label="Plan name" spellcheck="false">
+    <span id="save-state" class="save-state"></span>
+    <div class="spacer"></div>
+    <div class="group">
+      <button id="btn-undo" class="top-btn icon" title="Undo (Ctrl Z)" disabled></button>
+      <button id="btn-redo" class="top-btn icon" title="Redo (Ctrl Shift Z)" disabled></button>
+    </div>
+    <div class="group">
+      <button id="btn-new" class="top-btn" title="New plan"></button>
+      <button id="btn-open" class="top-btn" title="Open a .sdt plan (Ctrl O)"></button>
+      <button id="btn-export" class="top-btn primary" title="Download this plan as a .sdt file (Ctrl S)"></button>
+    </div>
+    <button id="btn-help" class="top-btn icon" title="Help and shortcuts (?)"></button>
+  </header>
+
+  <main class="app">
+    <nav id="rail" class="rail" aria-label="Tools"></nav>
+
+    <section class="stage-wrap">
+      <div id="canvas" class="canvas" tabindex="0" aria-label="Plan canvas"></div>
+
+      <div id="banner" class="banner" hidden></div>
+      <div id="cursor-tip" class="cursor-tip" hidden></div>
+
+      <div class="compass" title="North">
+        <svg id="north" viewBox="0 0 40 40" aria-hidden="true">
+          <circle cx="20" cy="20" r="17" fill="rgba(250,248,242,.85)" stroke="#5b5646" stroke-width="1"/>
+          <path d="M20 5l6 17h-12z" fill="#2f3a2c"/>
+          <path d="M20 35l-6-13h12z" fill="#fff" stroke="#2f3a2c" stroke-width="1"/>
+          <text x="20" y="4" text-anchor="middle" font-size="7" font-weight="700" fill="#2f3a2c" dy="-1">N</text>
+        </svg>
+      </div>
+      <div id="scalebar" class="scalebar"></div>
+
+      <div class="zoom">
+        <button id="btn-zin" title="Zoom in (+)"></button>
+        <button id="btn-zout" title="Zoom out (-)"></button>
+        <button id="btn-fit" title="Fit plan (F)"></button>
+      </div>
+
+      <div id="empty" class="empty" hidden>
+        <div class="empty-card">
+          <h1>Start a plan</h1>
+          <p>Trace your property over a satellite screenshot or a survey, then lay out the landscape to scale.</p>
+          <ol class="steps">
+            <li><span><b>Import</b> a Google Maps screenshot or survey PDF, or paste a screenshot with <kbd>Ctrl V</kbd>.</span></li>
+            <li><span><b>Set the scale</b> by clicking both ends of a distance you know.</span></li>
+            <li><span><b>Draw</b> the property line, house, driveway and existing trees.</span></li>
+          </ol>
+          <div class="empty-actions">
+            <button id="empty-import" class="btn primary">Import screenshot or survey</button>
+            <button id="empty-open" class="btn ghost">Open a saved plan</button>
+          </div>
+          <button id="empty-blank" class="link">or start drawing without a background</button>
+        </div>
+      </div>
+
+      <div id="dropzone" class="dropzone" hidden><div>Drop a screenshot, survey PDF or .sdt plan</div></div>
+    </section>
+
+    <aside id="sidebar" class="sidebar" aria-label="Properties"></aside>
+  </main>
+
+  <footer class="statusbar">
+    <span id="status-hint" class="status-hint"></span>
+    <div class="spacer"></div>
+    <label class="tg"><input id="tg-snap" type="checkbox" checked> Snap</label>
+    <label class="tg"><input id="tg-grid" type="checkbox" checked> Grid</label>
+    <label class="tg"><input id="tg-gridsnap" type="checkbox"> Snap to grid</label>
+    <span id="coords" class="coords"></span>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <input id="file-open" type="file" accept=".sdt,.zip,.json,image/*,.pdf" hidden>
+  <input id="file-bg" type="file" accept="image/*,.pdf,application/pdf" hidden>
+
+  <script src="vendor/konva.min.js"></script>
+  <script src="vendor/jszip.min.js"></script>
+  <script src="vendor/pdf.min.js"></script>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
